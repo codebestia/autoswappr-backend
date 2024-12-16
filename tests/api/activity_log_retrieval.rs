@@ -184,6 +184,10 @@ async fn test_log_retrieval_filter_with_wallet_address() {
     let body_bytes = to_bytes(resp.into_body(), usize::MAX).await.unwrap();
     let response_body: ActivityLogGetResponse = serde_json::from_slice(&body_bytes).unwrap();
     assert_eq!(response_body.transactions.len(), 3);
+    sqlx::query!("DELETE FROM transactions_log")
+        .execute(&app.db.pool)
+        .await
+        .unwrap();
 }
 
 #[tokio::test]
@@ -206,6 +210,10 @@ async fn test_log_retrieval_filter_with_from_token() {
     let body_bytes = to_bytes(resp.into_body(), usize::MAX).await.unwrap();
     let response_body: ActivityLogGetResponse = serde_json::from_slice(&body_bytes).unwrap();
     assert_eq!(response_body.transactions.len(), 7);
+    sqlx::query!("DELETE FROM transactions_log")
+        .execute(&app.db.pool)
+        .await
+        .unwrap();
 }
 
 #[tokio::test]
@@ -228,4 +236,8 @@ async fn test_log_retrieval_filter_with_amount_to() {
     let body_bytes = to_bytes(resp.into_body(), usize::MAX).await.unwrap();
     let response_body: ActivityLogGetResponse = serde_json::from_slice(&body_bytes).unwrap();
     assert_eq!(response_body.transactions.len(), 3);
+    sqlx::query!("DELETE FROM transactions_log")
+        .execute(&app.db.pool)
+        .await
+        .unwrap();
 }
