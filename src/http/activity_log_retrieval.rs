@@ -26,8 +26,7 @@ pub async fn log_retrieval(
             now.format(&Rfc3339).unwrap()
         }
     };
-    let initial_query = format!(
-        r#"
+    let initial_query = r#"
         SELECT
             wallet_address,
             from_token,
@@ -38,23 +37,22 @@ pub async fn log_retrieval(
             TO_CHAR(created_at, 'YYYY-MM-DD"T"HH24:MI:SSZ') AS created_at
         FROM transactions_log
         WHERE created_at < $1::TIMESTAMPTZ
-        "#
-    );
+    "#;
     let mut conditions = vec![];
     if let Some(wallet_address) = query_params.wallet_address {
-        conditions.push(format!("AND wallet_address = ${}", wallet_address));
+        conditions.push(format!("AND wallet_address = '{}'", wallet_address));
     }
 
     if let Some(from_token) = query_params.from_token {
-        conditions.push(format!("AND from_token = ${}", from_token));
+        conditions.push(format!("AND from_token = '{}'", from_token));
     }
 
     if let Some(to_token) = query_params.to_token {
-        conditions.push(format!("AND to_token = ${}", to_token));
+        conditions.push(format!("AND to_token = '{}'", to_token));
     }
 
     if let Some(amount_to) = query_params.amount_to {
-        conditions.push(format!("AND amount_to = ${}", amount_to));
+        conditions.push(format!("AND amount_to = '{}'", amount_to));
     }
 
     let query_build = format!(
