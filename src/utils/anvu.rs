@@ -5,14 +5,7 @@ use starknet::macros::selector;
 
 use super::starknet::{contract_address_felt, signer_account};
 
-#[derive(Debug, Clone, Eq, PartialEq, Encode, Decode)]
-pub struct Route {
-    pub token_from: Felt,
-    pub token_to: Felt,
-    pub exchange_address: Felt,
-    pub percent: u128,
-    pub additional_swap_params: Vec<Felt>,
-}
+
 
 #[derive(Debug, Clone, Eq, PartialEq, Encode, Decode)]
 pub struct SwapData {
@@ -24,7 +17,7 @@ pub struct SwapData {
     pub beneficiary: Felt,
     pub integrator_fee_amount_bps: u128,
     pub integrator_fee_recipient: Felt,
-    pub routes: Vec<Route>,
+    pub routes: Felt
 }
 
 impl SwapData {
@@ -37,7 +30,7 @@ impl SwapData {
         beneficiary: Felt,
         integrator_fee_amount_bps: u128,
         integrator_fee_recipient: Felt,
-        routes: Vec<Route>
+        routes: Felt
     ) -> Self {
         SwapData {
             token_from_address,
@@ -72,7 +65,7 @@ pub async fn anvu_swap(
     beneficiary: Felt,
     integrator_fee_amount_bps: u128,
     integrator_fee_recipient: Felt,
-    routes: Vec<Route>,
+    routes: Felt,
 ) -> AnvuResponse {
     let mut account = signer_account();
     let contract_address = contract_address_felt();
