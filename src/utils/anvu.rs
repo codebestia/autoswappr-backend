@@ -5,7 +5,18 @@ use starknet::macros::selector;
 
 use super::starknet::{contract_address_felt, signer_account};
 
+#[derive(Debug, Clone, Copy)]
+pub struct TokenFrom {
+    address: Felt,
+    amount: u128,
+}
 
+#[derive(Debug, Clone, Copy)]
+pub struct TokenTo {
+    address: Felt,
+    amount: u128,
+    min_amount: u128,
+}
 
 #[derive(Debug, Clone, Eq, PartialEq, Encode, Decode)]
 pub struct SwapData {
@@ -17,37 +28,31 @@ pub struct SwapData {
     pub beneficiary: Felt,
     pub integrator_fee_amount_bps: u128,
     pub integrator_fee_recipient: Felt,
-    pub routes: Felt
+    pub routes: Felt,
 }
 
 impl SwapData {
     pub fn new(
-        token_from_address: Felt,
-        token_from_amount: u128,
-        token_to_address: Felt,
-        token_to_amount: u128,
-        token_to_min_amount: u128,
+        token_from: TokenFrom,
+        token_to: TokenTo,
         beneficiary: Felt,
         integrator_fee_amount_bps: u128,
         integrator_fee_recipient: Felt,
-        routes: Felt
+        routes: Felt,
     ) -> Self {
         SwapData {
-            token_from_address,
-            token_from_amount,
-            token_to_address,
-            token_to_amount,
-            token_to_min_amount,
+            token_from_address: token_from.address,
+            token_from_amount: token_from.amount,
+            token_to_address: token_to.address,
+            token_to_amount: token_to.amount,
+            token_to_min_amount: token_to.min_amount,
             beneficiary,
             integrator_fee_amount_bps,
             integrator_fee_recipient,
-            routes
+            routes,
         }
     }
 }
-
-
-
 
 type AnvuResponse = Result<
     starknet::core::types::InvokeTransactionResult,
@@ -57,11 +62,8 @@ type AnvuResponse = Result<
 >;
 
 pub async fn anvu_swap(
-    token_from_address: Felt,
-    token_from_amount: u128,
-    token_to_address: Felt,
-    token_to_amount: u128,
-    token_to_min_amount: u128,
+    token_from: TokenFrom,
+    token_to: TokenTo,
     beneficiary: Felt,
     integrator_fee_amount_bps: u128,
     integrator_fee_recipient: Felt,
@@ -70,15 +72,12 @@ pub async fn anvu_swap(
     let mut account = signer_account();
     let contract_address = contract_address_felt();
     let swap_data = SwapData::new(
-        token_from_address,
-        token_from_amount,
-        token_to_address,
-        token_to_amount,
-        token_to_min_amount,
+        token_from,
+        token_to,
         beneficiary,
         integrator_fee_amount_bps,
         integrator_fee_recipient,
-        routes
+        routes,
     );
 
     account.set_block_id(BlockId::Tag(BlockTag::Pending));
@@ -86,11 +85,10 @@ pub async fn anvu_swap(
     let mut serialized = vec![];
     swap_data.encode(&mut serialized).unwrap();
 
-
     let approve_call = Call {
-        to: token_from_address,
+        to: token_from.address,
         selector: selector!("approve"),
-        calldata: vec![contract_address, Felt::from(token_from_amount)],
+        calldata: vec![contract_address, Felt::from(token_from.amount)],
     };
 
     let swap_call = Call {
